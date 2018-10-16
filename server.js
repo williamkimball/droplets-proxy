@@ -5,7 +5,10 @@ const app = express();
 const port = process.env.PORT || 6060;
 app.set("port", port);
 const request = require("request");
-const apiUrl = "http://api.travelpayouts.com/v1";
+const apiUrl = "https://sandbox.plaid.com";
+var bodyParser = require("body-parser");
+
+app.use(bodyParser());
 
 app.use(function(req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
@@ -13,27 +16,25 @@ app.use(function(req, res, next) {
     "Access-Control-Allow-Headers",
     "Origin, X-Requested-With, Content-Type, Accept"
   );
-  console.log("yo");
   next();
 });
 
-app.get("/api/*", (req, res) => {
-  let apiCall = req.url.slice("/api/".length);
+app.post("/*", (req, res) => {
+  let apiCall = req.url.slice("/".length);
+  let data = JSON.stringify(req.body);
   let apiReq = `${apiUrl}/${apiCall}`;
   let options = {
-    method: "GET",
+    method: "POST",
     url: apiReq,
+    body: data,
     headers: {
-      "X-Access-Token": "7fe8a6850404e8611035f004e2a6bc3f",
-      "Access-Control-Allow-Headers": "X-Access-Token"
+      "Content-Type": "application/json"
     }
   };
 
   request(options, (err, _, body) => {
     let json = JSON.parse(body);
-    console.log(json);
     res.send(body);
   });
 });
-
 app.listen(port, () => console.log(`Listening on port: ${port}`));
